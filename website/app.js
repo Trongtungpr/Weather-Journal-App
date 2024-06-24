@@ -1,12 +1,6 @@
-/* Global Variables */
-
-// const { log } = require("console");
-
-// Create a new date instance dynamically with JS
-
-    let d = new Date();
-    let newDate = d.getMonth()+'.'+ d.getDate()+'.'+ d.getFullYear();
-
+// Tạo một instance Date mới một cách linh động bằng JS
+let d = new Date();
+let newDate = d.getMonth() + 1 + '.' + d.getDate() + '.' + d.getFullYear(); 
 
 // API key và baseURL
 const apiKey = "a2df864d6fbd47e06802cb4cf8fd6f17"; // Thay YOUR_API_KEY bằng API key của bạn từ OpenWeatherMap
@@ -46,34 +40,74 @@ async function getWeatherData(zipCode) {
     return data;
   } catch (error) {
     console.error("Lỗi khi parse JSON:", error);
-    throw error; // Ném lỗi lên để xử lý ở cấp cao hơn
+    throw error; 
   }
 }
 
+// Hàm để POST dữ liệu lên server
+async function postData(url = '', data = {}) {
+  const response = await fetch(url, {
+    method: 'POST',
+    credentials: 'same-origin', 
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data), 
+  });
+
+  try {
+    const newData = await response.json();
+    return newData;
+  } catch (error) {
+    console.error('Lỗi khi POST dữ liệu:', error);
+    throw error; 
+  }
+}
+
+// Hàm để GET dữ liệu từ server
+async function retrieveData() {
+  const request = await fetch('/all');
+  try {
+    const allData = await request.json();
+    console.log(allData);
+    return allData; 
+  } catch (error) {
+    console.log("Lỗi khi GET dữ liệu:", error);
+    throw error; 
+  }
+}
 
 // Hàm để cập nhật UI với dữ liệu thời tiết và cảm xúc
-function updateUI() {
-  const date = new Date(weatherData.dt * 1000).toLocaleDateString();
-  const temp = weatherData.main.temp;
-  const feelings = feelingsInput.value;
-
-  dateElement.textContent = `Ngày: ${newDate}`; // Sử dụng newDate
-  tempElement.textContent = `Nhiệt độ: ${temp}°C`;
-  contentElement.textContent = `Cảm xúc của bạn: ${feelings}`;
+function updateUI(data) {
+  dateElement.textContent = `Ngày: ${data.date}`; 
+  tempElement.textContent = `Nhiệt độ: ${data.temp}°C`;
+  contentElement.textContent = `Cảm xúc của bạn: ${data.feelings}`;
 }
 
 // Xử lý sự kiện khi click nút "Generate"
 generateButton.addEventListener("click", async () => {
   const zipCode = zipInput.value;
-  if (zipCode) {
+  const feelings = feelingsInput.value;
+
+  if (zipCode && feelings) {
     try {
-      await getWeatherData(zipCode);
-      updateUI();
+      await getWeatherData(zipCode); 
+
+      const dataToPost = {
+        date: newDate,
+        temp: weatherData.main.temp,
+        feelings: feelings,
+      };
+
+      await postData('/addProjectData', dataToPost); 
+
+      const projectData = await retrieveData();
+      updateUI(projectData); 
+
     } catch (error) {
       alert(`Có lỗi xảy ra: ${error.message}`);
     }
   } else {
-    alert("Vui lòng nhập mã zip.");
+    alert("Vui lòng nhập mã zip và cảm xúc của bạn.");
   }
 });
-

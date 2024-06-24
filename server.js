@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const port = 5000;
+const port = 8000;
 
 // Khởi tạo projectData với một mảng rỗng
 let projectData = { data: [] };
@@ -11,15 +11,9 @@ let projectData = { data: [] };
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors()); // Cho phép yêu cầu từ mọi nguồn gốc
 
-// Cấu hình CORS cho phép request từ domain của client
-const corsOptions = {
-  origin: 'http://localhost:3000', // Thay thế bằng domain của client (nếu khác)
-  optionsSuccessStatus: 200 
-}
-app.use(cors(corsOptions)); 
-
-app.use(express.static('website')); // Phục vụ file tĩnh từ thư mục 'website'
+app.use(express.static('website')); 
 
 // Routes
 app.get('/all', (req, res) => {
