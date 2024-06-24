@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const port = 8000;
+const port = 5000;
 
 // Khởi tạo projectData với một mảng rỗng
 let projectData = { data: [] };
